@@ -9,17 +9,30 @@ app.use(express.json())
 
 const { BD_Host } = process.env;
 
-const PORT =  BD_Host || 8800;
+const PORT = 8800;
 
-mongoose
-  .connect(BD_Host)
-  .then(() => {
-    console.log("connected to base");
-    app.listen(PORT, () => {
-      console.log("Connected");
-    });
-  })
-  .catch((error) => {
-    console.log("error", error.message);
-    process.exit(1);
-  });
+// mongoose
+// .connect(BD_Host)
+//  .then(() => {
+//    console.log("connected to base");
+//    app.listen(PORT, () => {
+//      console.log("Connected");
+//    });
+//  })
+//  .catch((error) => {
+//    console.log("error", error.message);
+//    process.exit(1);
+//  });
+
+app.get('/', (req, res) => {
+  res.send('Hello World!')
+
+})
+
+
+
+
+
+app.listen(PORT, function () {
+  console.log(`Server listens ${PORT}`);
+});
