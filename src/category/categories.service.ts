@@ -1,13 +1,28 @@
-import {Categories} from '../model/category'
+import { Request, Response, NextFunction } from 'express';
+import { Categories } from '../model/category-model';
 
-const getCategories = async() =>{
-    const response = await Categories.find();
-    return response
+const getCategories = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const data = await Categories.find();
+        res.status(200).json(data)
+
+    } catch (error) {
+        next(error)
+    }
 }
 
-const createCategory = async (city: string, url: string)=>{
-    const category = await Categories.create({city, url});
-    return category
+const createCategory = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { country, url } = req.body;
+      
+        const category = await Categories.create({ country, url })
+        res.status(201).json(category)
+    } catch (error) {
+        next(error)
+    }
 }
 
-export default {getCategories, createCategory}
+export default { getCategories, createCategory }
+
+
+

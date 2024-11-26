@@ -5,11 +5,8 @@ import app from "./app";
 
 dotenv.config();
 const PORT = process.env.PORT || 4400;
-const {BD_HOST} = process.env
+const BD_HOST = process.env.BD_HOST as string
 
-if (!BD_HOST) {
-  throw new Error("BD_HOST is not defined in environment variables");
-}
 mongoose.connect(BD_HOST)
 .then(()=>{
   console.log("connected to base")
