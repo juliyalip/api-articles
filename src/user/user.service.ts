@@ -1,8 +1,11 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import dotenv from 'dotenv';
 import HttpError from "../utils/HttpError";
 import { Users, Role } from "../model/user-model";
+
+dotenv.config();
 
 const SECRET = process.env.SECRET as string;
 
