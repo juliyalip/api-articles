@@ -15,11 +15,12 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
     }
     const solt = await bcrypt.genSalt(10);
     const hashPassword = await bcrypt.hash(password, solt);
-    await Users.create({
+    const newUser = await Users.create({
       ...req.body,
       password: hashPassword,
       role: Role.USER,
     });
+    res.status(201).json({name: newUser.name})
   } catch (error) {
     console.log(error);
   }
