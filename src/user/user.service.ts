@@ -9,6 +9,7 @@ dotenv.config();
 
 const SECRET = process.env.SECRET as string;
 
+
 const register = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { email, password } = req.body;
@@ -32,18 +33,18 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
 const login = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { email, password } = req.body;
-    const isUserExisted = await Users.findOne({ email });
-    if (!isUserExisted || !isUserExisted.password) {
+    const user = await Users.findOne({ email });
+    if (!user || !user.password) {
       return next(new HttpError(401, "email or password is invalide"));
     }
-    const passwordCompare = bcrypt.compare(password, isUserExisted.password);
+    const passwordCompare = bcrypt.compare(password, user.password);
     if (!passwordCompare) {
       return next(new HttpError(401, "email or password is invalide"));
     }
     const payload = {
-      id: isUserExisted._id,
-      email: isUserExisted.email,
-      role: isUserExisted.role,
+      id: user._id,
+      email: user.email,
+      role: user.role,
     };
 
     const accessToken = jwt.sign(payload, SECRET, { expiresIn: "1h" });
