@@ -1,4 +1,5 @@
 import { Schema, model } from "mongoose";
+import { ObjectId } from 'mongodb';
 import Joi from 'joi';
 
 const emailRegexp =
@@ -9,6 +10,14 @@ export enum Role{
     USER = "USER"
 }
 
+export type TUser ={
+id: ObjectId;
+name: string;
+email: string;
+password: string;
+role: Role
+}
+
 const userSchema = new Schema({
     name: {type: String, require: true},
     email: {type: String, require: true},
@@ -16,7 +25,7 @@ const userSchema = new Schema({
     role: {type: String, enum: Object.values(Role), default: [Role.USER]}
 })
 
-export const Users = model("users", userSchema)
+export const Users = model<TUser>("users", userSchema)
 
 const registerSchema = Joi.object({
     name: Joi.string().alphanum().min(3).required(),
