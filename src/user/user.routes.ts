@@ -9,7 +9,7 @@ const userRoutes = express.Router()
 
 
 userRoutes.get("/current", auth(), service.current)
-userRoutes.post("/register" , service.register)
+userRoutes.post("/register", service.register)
 userRoutes.post("/login", service.login)
 userRoutes.post('/logout' , service.logout)
 

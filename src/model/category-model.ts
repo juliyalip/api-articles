@@ -4,10 +4,14 @@ import Joi from 'joi'
 const categorySchema = new Schema({
     title: {type: String, require: true},
     url: {type: String, require: true},
-      articles: [{type: Schema.Types.ObjectId,
-        ref: "articles",
-        require: true
-    }]
+   },
+   {
+    versionKey: false, 
+  })
+
+export const createCategorySchema = Joi.object({
+  title: Joi.string().min(3).required(),
+  url: Joi.string().min(3).required()
 })
 
-export const Categories = model("categories", categorySchema) 
+export const Categories = model("categories", categorySchema);

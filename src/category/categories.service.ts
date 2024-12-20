@@ -13,9 +13,9 @@ const getCategories = async (req: Request, res: Response, next: NextFunction) =>
 
 const createCategory = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { country, url } = req.body;
+        const { title, url } = req.body;
       
-        const category = await Categories.create({ country, url })
+        const category = await Categories.create({ title, url })
         res.status(201).json(category)
     } catch (error) {
         next(error)

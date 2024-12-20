@@ -8,8 +8,13 @@ export const articleSchema = new Schema(
         description: { type: String, require: true},
         spoiler: {type: String, require: true},
         coverImg: {type: String},
-        published: {type: Boolean, require: true}
-            }
+        published: {type: Boolean, require: true},
+        category: {type: Schema.Types.ObjectId, ref: "categories", require: true}
+            },
+            {
+                versionKey: false, 
+              }
+           
            
 );
 
