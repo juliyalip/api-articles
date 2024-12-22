@@ -1,15 +1,20 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "CommonJS",
-    "moduleResolution": "node",
-    "outDir": "./dist",                             /* Папка для скомпилированных файлов */
-    "rootDir": "./src",                             /* Папка с исходными файлами */
-    "esModuleInterop": true,                        /* Поддержка импорта модулей CommonJS */
-    "forceConsistentCasingInFileNames": true,       /* Проверка правильного использования регистра букв в путях */
-    "skipLibCheck": true,                           /* Пропуск проверки типов библиотек */
-    "experimentalDecorators": true,                 /* Поддержка экспериментальных декораторов */
-    "strict": true,                                 /* Включение строгой проверки типов */
-    "sourceMap": true                               /* Создание sourcemaps для исходных файлов */
-  }
+    "target": "ES2020", 
+    "module": "CommonJS", 
+    "moduleResolution": "node", 
+    "outDir": "./dist", 
+    "esModuleInterop": true, 
+    "skipLibCheck": true, 
+    "strict": true, 
+    "resolveJsonModule": true, 
+    "noImplicitAny": false, 
+    "baseUrl": "./src", 
+    "paths": {
+      "*": ["node_modules/*", "src/types/*"] 
+    }
+  },
+  "include": [
+    "src/**/*.ts" 
+  ]
 }
