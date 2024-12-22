@@ -1,6 +1,7 @@
 import {Request, Response, NextFunction } from "express";
 import { CustomRequest } from "../middelwares/authentificate";
 import { Articles } from "../model/article-model";
+import {Role} from '../model/user-model'
 import HttpError from "../utils/HttpError";
 
 const getAllArticles = async (req: Request, res: Response, next: NextFunction )=>{
@@ -24,7 +25,7 @@ const getArticlesById = async (req: Request, res: Response, next: NextFunction) 
 
 const createArticle = async (req: CustomRequest, res: Response, next: NextFunction)=>{
    if (!req.user){
-return next(new HttpError(403, 'You have to be authorization'))
+return next(new HttpError(403, 'You have to be authorizated'))
    }
 try{
    const {id} = req.user;
@@ -41,5 +42,22 @@ try{
 }
 
 
+const deleteArticle = async (req: CustomRequest, res: Response, next: NextFunction ) =>{
+  if(!req.user ){
+   return next(new HttpError(403, 'You have to be authorizated'))
+  }
+   try{
+    const {role} = req.user;
+    if(role !== Role.ADMIN){
+      return next(new HttpError(403, 'You have to be authorizated'))
+    }
+    const {articleId} = req.params;
+await Articles.findByIdAndDelete(articleId)
+res.status(204).send()
+   }catch(error){
+      next(error)
+   }
+}
 
-export default {getAllArticles, getArticlesById, createArticle}
+
+export default {getAllArticles, getArticlesById, createArticle, deleteArticle}
