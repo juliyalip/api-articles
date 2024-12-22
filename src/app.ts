@@ -3,6 +3,7 @@ import cors from 'cors';
 import path from 'path'
 import userRoutes from "./user/user.routes";
 import categoriesRoutes from "./category/categories.routes";
+import articleRoutes from "./article/article.routes";
 
 const app = express();
 app.use(cors())
@@ -17,6 +18,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 app.use("/api", userRoutes)
 app.use("/api/categories", categoriesRoutes)
+app.use('/api/articles', articleRoutes)
 
 app.use((req: Request, res: Response)=>{
 res.status(404).json({message: "Page is not found"})

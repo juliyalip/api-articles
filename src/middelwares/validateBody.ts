@@ -6,7 +6,7 @@ export const validateBody = (schema: Schema) => {
     const validate = function (req: Request, res: Response, next: NextFunction) {
         const { error } = schema.validate(req.body);
         if (error) {
-            next(new HttpError(400, "Fill out the all fields"))
+         return   next(new HttpError(400, "Fill out the all fields"))
         } next()
     }; return validate
 }

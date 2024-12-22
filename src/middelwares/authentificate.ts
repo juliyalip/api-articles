@@ -11,7 +11,7 @@ export interface IUserRequest {
     role: Role
 }
 
-interface CustomRequest extends Request {
+export interface CustomRequest extends Request {
     user?: IUserRequest
 }
 

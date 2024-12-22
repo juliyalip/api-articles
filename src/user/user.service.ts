@@ -4,14 +4,12 @@ import bcrypt from "bcrypt";
 import dotenv from 'dotenv';
 import HttpError from "../utils/HttpError";
 import UserDTO from "./dto/user.dto";
-import { Users, Role, TUser } from "../model/user-model";
+import { Users, Role } from "../model/user-model";
 import { IUserRequest } from "../middelwares/authentificate";
-
 
 dotenv.config();
 
 const SECRET = process.env.SECRET as string;
-
 
 const register = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -55,7 +53,6 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
     
     const payload = {
       id: user._id,
-      email: user.email,
       role: user.role,
     };
   
