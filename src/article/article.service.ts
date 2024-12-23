@@ -5,8 +5,15 @@ import {Role} from '../model/user-model'
 import HttpError from "../utils/HttpError";
 
 const getAllArticles = async (req: Request, res: Response, next: NextFunction )=>{
+   const page = parseInt(req.query.page as string , 10) || 1;
+   const limit = parseInt(req.query.limit as string, 10) || 4
+   const skip = (page - 1 ) * limit;
+  
      try{
-        const data = await Articles.find();
+        const data = await Articles.find({published: true}, null,
+        {    skip,
+            limit,
+          })
         res.status(200).json(data)
      }catch(error){
         next(error)
