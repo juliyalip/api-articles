@@ -14,7 +14,8 @@ const getAllArticles = async (req: Request, res: Response, next: NextFunction )=
         {    skip,
             limit,
           })
-        res.status(200).json(data)
+          const hasMoreArticles = data.length === limit
+        res.status(200).json({data, hasMoreArticles})
      }catch(error){
         next(error)
      }
