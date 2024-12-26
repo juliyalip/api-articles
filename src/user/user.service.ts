@@ -11,6 +11,7 @@ dotenv.config();
 
 const SECRET = process.env.SECRET as string;
 
+
 const register = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { email, password } = req.body;
