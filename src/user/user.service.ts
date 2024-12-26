@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import { Types} from "mongoose";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import dotenv from 'dotenv';
@@ -10,6 +11,16 @@ import { IUserRequest } from "../middelwares/authentificate";
 dotenv.config();
 
 const SECRET = process.env.SECRET as string;
+
+type Payload ={ id: Types.ObjectId,  role: string}
+
+const makeAccessToken = (payload : Payload) =>{
+  return jwt.sign(payload, SECRET, { expiresIn: "6h" })
+}
+
+const makeRefreshToken = (payload : Payload) =>{
+  return jwt.sign(payload, SECRET, { expiresIn: "1h" })
+}
 
 
 const register = async (req: Request, res: Response, next: NextFunction) => {
@@ -57,8 +68,8 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
       role: user.role,
     };
   
-    const accessToken = jwt.sign(payload, SECRET, { expiresIn: "1h" });
-    const refreshToken = jwt.sign(payload, SECRET, { expiresIn: "6h" });
+    const accessToken = makeAccessToken(payload);
+    const refreshToken = makeRefreshToken(payload);
 
     res.cookie("refresh_token", refreshToken, {
       expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 10), // 10 дней
@@ -71,6 +82,38 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
     next(error);
   }
 };
+
+const updateAllTokens = async(req: Request, res: Response, next: NextFunction) =>{
+
+const refreshToken = req.cookies["refresh_token"];
+
+if(!refreshToken){
+  return next(new HttpError(401, "Refresh token is not valid"))
+}
+try{
+  const decodedToken = jwt.verify(refreshToken, SECRET) as {id: Types.ObjectId, role: string};
+
+  const user = await Users.findById(decodedToken.id)
+  if(!user){
+    return next (new HttpError(401, "Invalid token"))
+  }
+   
+  const newAccessToken = makeAccessToken(decodedToken);
+  const newRefreshToken = makeRefreshToken(decodedToken);
+
+   res.cookie("refresh_token", newRefreshToken, {
+    expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 10), // 10 дней
+    maxAge: 1000 * 60 * 60 * 24 * 10,
+    httpOnly: true,
+  });
+
+  res.setHeader('Authorization', `Bearer ${newAccessToken}`);
+  
+  res.status(200).json({ message: 'Tokens refreshed' });
+} catch (error) {
+  return next(error)
+}
+}
 
 const current = async (req:Request & {user?: IUserRequest}, res: Response, next:NextFunction)=>{
 
@@ -132,4 +175,4 @@ const getUsers = async (req: Request, res: Response, next: NextFunction )=>{
   }
 }
 
-export default { register, login , current, logout, changeRole, getUsers};
+export default {updateAllTokens, register, login , current, logout, changeRole, getUsers};

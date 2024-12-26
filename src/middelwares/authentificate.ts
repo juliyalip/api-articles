@@ -16,55 +16,29 @@ export interface CustomRequest extends Request {
 }
 
 
-
 const auth = (roles: Role[] = []) => async (req: CustomRequest, res: Response, next: NextFunction) => {
-    const {authorization = ''} = req.headers;
-    const [bearer, token] = authorization.split(' ')
+    const { authorization = '' } = req.headers;
+    const [bearer, token] = authorization.split(' ');
 
-    if (bearer !== "Bearer") {
+    if (bearer !== "Bearer" || !token) {
         return next(new HttpError(401, "Unauthorized"));
     }
 
     try {
-        const { id, role } = jwt.verify(token, SECRET as string) as { id: ObjectId, role: Role };
+        const { id, role } = jwt.verify(token, SECRET as string) as { id: ObjectId; role: Role };
 
         const user = await Users.findById(id);
-        if (!user || (!roles.length || !roles.includes(role))) {
+        if (!user || (roles.length > 0 && !roles.includes(role))) {
             return next(new HttpError(403, "No permissions"));
         }
 
         req.user = { id, role };
         next();
     } catch (err) {
-       const refreshToken = req.cookies['refresh_token'];
-       if(!refreshToken){
-        return next(new HttpError(401, 'Unautorization'))
-       }
-       try{
-        const decodedRefresh = jwt.verify(refreshToken, SECRET as string) as { id: ObjectId; role: Role };
-     
-        const newAccessToken = jwt.sign(
-            { id: decodedRefresh.id, role: decodedRefresh.role }, 
-            SECRET as string, { expiresIn: '1h' });
-
-       const newRefreshToken = jwt.sign(  { id: decodedRefresh.id, role: decodedRefresh.role },  SECRET as string, { expiresIn: '6h' })
-
-      res.setHeader('Authorization', `Bearer ${newAccessToken}`);
-
-      res.cookie('refresh_token', newRefreshToken, {
-        expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 10), 
-        
-        httpOnly: true,
-        
-      });
-
-      req.user = { id: decodedRefresh.id, role: decodedRefresh.role };
-      next();
-    } catch (refreshError) {
-      return next(new HttpError(401, "Invalid refresh token"));
-    }
+        return next(new HttpError(401, "Invalid or expired token"));
     }
 };
 
 export default auth;
+
 
