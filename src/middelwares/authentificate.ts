@@ -1,8 +1,9 @@
-import { Request, Response, NextFunction } from 'express'
+import  { Request, Response, NextFunction } from 'express'
 import { ObjectId } from 'mongodb';
 import jwt from 'jsonwebtoken'
 import HttpError from '../utils/HttpError'
-import { Role, Users, TUser } from '../model/user-model'
+import { Role, Users} from '../model/user-model'
+import { Multer } from "multer";
 
 const { SECRET } = process.env;
 
@@ -12,12 +13,13 @@ export interface IUserRequest {
 }
 
 export interface CustomRequest extends Request {
-    user?: IUserRequest
-}
+    user?: IUserRequest,
+      file?: Express.Multer.File,
+      }
 
 
 const auth = (roles: Role[] = []) => async (req: CustomRequest, res: Response, next: NextFunction) => {
-    const { authorization = '' } = req.headers;
+      const { authorization = '' } = req.headers;
     const [bearer, token] = authorization.split(' ');
 
     if (bearer !== "Bearer" || !token) {

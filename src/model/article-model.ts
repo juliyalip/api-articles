@@ -1,8 +1,6 @@
 import { Schema, model } from "mongoose";
 import Joi from 'joi'
 import { Categories } from "./category-model";
-import { title } from "process";
-
 
 export const articleSchema = new Schema(
     {
@@ -28,17 +26,16 @@ export const createArticleSchema = Joi.object({
     city: Joi.string().required(),
     description: Joi.string().required(),
     title: Joi.string().required(),
-        spoiler: Joi.string().required(),
-        coverImg: Joi.string(),
-            category: Joi.string().custom(async (creategoryId, helpers)=>{
-            const categoryId = await Categories.find({_id: creategoryId})
-            if(!categoryId){
-                return helpers.error('any.invalid', {message: "Invalid category"})
-            }
-            return categoryId
-        }).required(),
-        
-})
+    spoiler: Joi.string().required(),
+    category: Joi.string().required().external(async (categoryId) => {
+        const category = await Categories.findById(categoryId);
+        if (!category) {
+            throw new Error("Invalid category");
+        }
+        return categoryId;
+    }),
+});
+
 
 export const Articles = model("articles", articleSchema)
 
