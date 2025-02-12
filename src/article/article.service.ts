@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { CustomRequest } from "../middelwares/authentificate";
 import { Articles } from "../model/article-model";
 import { Role } from "../model/user-model";
+import { getPaginationParams } from "../utils/getPaginationParams";
 import HttpError from "../utils/HttpError";
 import cloudinary from "./config/cloudinary";
 
@@ -10,9 +11,7 @@ const getAllArticles = async (
   res: Response,
   next: NextFunction
 ) => {
-  const page = parseInt(req.query.page as string, 10) || 1;
-  const limit = parseInt(req.query.limit as string, 10) || 4;
-  const skip = (page - 1) * limit;
+  const { limit, skip } = getPaginationParams(req.query);
 
   try {
     const data = await Articles.find({ published: true }, null, {
@@ -25,6 +24,20 @@ const getAllArticles = async (
     next(error);
   }
 };
+
+const getPopularArticles = async (req: CustomRequest, res: Response, next: NextFunction) =>{
+try{
+  const { limit, skip } = getPaginationParams(req.query);
+
+  const data = await Articles.find({published: true, city: "Malbork"}, null, 
+    {skip, limit})
+    const hasMoreArticles = data.length === limit;
+    res.status(200).json({data, hasMoreArticles})
+
+}catch(error){
+  console.log(error)
+}
+}
 
 const getArticlesById = async (
   req: Request,
@@ -39,6 +52,8 @@ const getArticlesById = async (
     next(error);
   }
 };
+
+
 
 const createArticle = async (
   req: CustomRequest,
@@ -85,9 +100,14 @@ const getAllUnpublishedArticles = async (
   if (!req.user) {
     return next(new HttpError(403, "You have to be authorization"));
   }
+  const { limit, skip } = getPaginationParams(req.query);
   try {
-    const data = await Articles.find({ published: false });
-    res.status(200).json(data);
+    const data = await Articles.find({ published: false }, null, {
+      skip,
+      limit
+    })
+    const hasMoreArticles = data.length === limit;
+    res.status(200).json({data, hasMoreArticles});
   } catch (error) {
     console.log(error);
   }
@@ -140,4 +160,5 @@ export default {
   createArticle,
   deleteArticle,
   updateUnpublishedArticle,
+  getPopularArticles
 };

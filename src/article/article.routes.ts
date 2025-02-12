@@ -6,11 +6,10 @@ import { validateBody } from "../middelwares/validateBody";
 import { createArticleSchema } from "../model/article-model";
 import { upload } from "../middelwares/upload";
 
-
-
 const articleRoutes = express.Router();
 
 articleRoutes.get('/',  service.getAllArticles);
+articleRoutes.get('/popular', service.getPopularArticles)
 articleRoutes.get('/unpublished', auth([Role.ADMIN, Role.USER]),  service.getAllUnpublishedArticles)
 articleRoutes.get('/:articleId', service.getArticlesById)
 articleRoutes.post('/', auth([Role.USER, Role.ADMIN]), upload.single("coverImg"), validateBody(createArticleSchema), service.createArticle)

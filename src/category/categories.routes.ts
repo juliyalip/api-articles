@@ -8,6 +8,7 @@ import {Role} from '../model/user-model'
 const categoriesRoutes = express.Router();
 
 categoriesRoutes.get("/",  service.getCategories)
+categoriesRoutes.get('/:category', service.getCategory)
 categoriesRoutes.post("/", auth([Role.ADMIN]), validateBody(createCategorySchema), service.createCategory)
 
 export default categoriesRoutes
