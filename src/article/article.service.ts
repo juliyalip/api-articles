@@ -1,9 +1,12 @@
 import { Request, Response, NextFunction } from "express";
+import fs from 'fs/promises'
+import { getOptimizeImg } from "../utils/getOptimazeImg";
 import { CustomRequest } from "../middelwares/authentificate";
 import { Articles } from "../model/article-model";
 import { Role } from "../model/user-model";
 import { getPaginationParams } from "../utils/getPaginationParams";
 import HttpError from "../utils/HttpError";
+import { wrapperComponent } from "../utils/wrapperComponent";
 import cloudinary from "./config/cloudinary";
 
 const getAllArticles = async (
@@ -25,18 +28,18 @@ const getAllArticles = async (
   }
 };
 
-const getPopularArticles = async (req: CustomRequest, res: Response, next: NextFunction) =>{
-try{
-  const { limit, skip } = getPaginationParams(req.query);
+const getPopularArticles = async (req: CustomRequest, res: Response, next: NextFunction) => {
+  try {
+    const { limit, skip } = getPaginationParams(req.query);
 
-  const data = await Articles.find({published: true, city: "Malbork"}, null, 
-    {skip, limit})
+    const data = await Articles.find({ published: true, city: "Malbork" }, null,
+      { skip, limit })
     const hasMoreArticles = data.length === limit;
-    res.status(200).json({data, hasMoreArticles})
+    res.status(200).json({ data, hasMoreArticles })
 
-}catch(error){
-  console.log(error)
-}
+  } catch (error) {
+    console.log(error)
+  }
 }
 
 const getArticlesById = async (
@@ -65,30 +68,30 @@ const createArticle = async (
     return next(new HttpError(403, "You have to be authorized"));
   }
 
-  try {
-    const { id } = req.user;
-    const newArticle = { ...req.body, author: id, published: false };
+  const { id } = req.user;
+  const newArticle = { ...req.body, author: id, published: false };
 
-    if (req.file) {
+  if (req.file) {
 
-      try {
-        const cloudinaryResult = await cloudinary.uploader.upload(req.file.path, {
-          folder: "articles",
-          public_id: `${id}_${Date.now()}`
-        })
-        newArticle.coverImg = cloudinaryResult.secure_url
-      } catch (error) {
-        next(error);
-      }
+    try {
+      const tempPath = await getOptimizeImg(req.file.path);
+      const { secure_url: coverImg, public_id: idColudImg } = await cloudinary.uploader.upload(tempPath, {
+        folder: "articles",
+        transformation: { width: 300, crop: 'fill' }
+      })
+      newArticle.coverImg = coverImg;
+      newArticle.idCloudImg = idColudImg;
+
+      await fs.unlink(tempPath)
+    } catch (error) {
+      next(error);
     }
-
-    const article = await Articles.create(newArticle);
-
-    res.status(201).json(article);
-  } catch (error) {
-
-    next(error);
   }
+
+  const article = await Articles.create(newArticle);
+
+  res.status(201).json(article);
+
 };
 
 
@@ -107,7 +110,7 @@ const getAllUnpublishedArticles = async (
       limit
     })
     const hasMoreArticles = data.length === limit;
-    res.status(200).json({data, hasMoreArticles});
+    res.status(200).json({ data, hasMoreArticles });
   } catch (error) {
     console.log(error);
   }
@@ -121,15 +124,13 @@ const updateUnpublishedArticle = async (
   if (!req.user) {
     return next(new HttpError(403, "You have to be authorization"));
   }
-  try {
-    const { articleId } = req.params;
-    const data = await Articles.findByIdAndUpdate(articleId, req.body, {
-      new: true,
-    });
-    res.status(200).json(data);
-  } catch (error) {
-    console.log(error);
-  }
+
+  const { articleId } = req.params;
+  const data = await Articles.findByIdAndUpdate(articleId, req.body, {
+    new: true,
+  });
+  res.status(200).json(data);
+
 };
 
 const deleteArticle = async (
@@ -140,25 +141,23 @@ const deleteArticle = async (
   if (!req.user) {
     return next(new HttpError(403, "You have to be authorizated"));
   }
-  try {
-    const { role } = req.user;
-    if (role !== Role.ADMIN) {
-      return next(new HttpError(403, "You have to be authorizated"));
-    }
-    const { articleId } = req.params;
-    await Articles.findByIdAndDelete(articleId);
-    res.status(204).send();
-  } catch (error) {
-    next(error);
+
+  const { role } = req.user;
+  if (role !== Role.ADMIN) {
+    return next(new HttpError(403, "You have to be authorizated"));
   }
+  const { articleId } = req.params;
+  await Articles.findByIdAndDelete(articleId);
+  res.status(204).send();
+
 };
 
 export default {
   getAllArticles,
-  getAllUnpublishedArticles,
+  getAllUnpublishedArticles: wrapperComponent(getAllUnpublishedArticles),
   getArticlesById,
-  createArticle,
-  deleteArticle,
+  createArticle: wrapperComponent(createArticle),
+  deleteArticle: wrapperComponent(deleteArticle),
   updateUnpublishedArticle,
   getPopularArticles
 };

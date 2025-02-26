@@ -1,7 +1,7 @@
 import multer from 'multer';
 import path from 'path'
 
-const publicDir = path.resolve(process.cwd(), 'public', 'countries');
+const publicDir = path.resolve(process.cwd(), "temp");
 
   const multerConfig = multer.diskStorage({
     destination: (req, file, cb) => {

@@ -1,5 +1,6 @@
 import { Schema, model } from "mongoose";
 import { ObjectId } from 'mongodb';
+
 import Joi from 'joi';
 
 const emailRegexp =
@@ -15,14 +16,18 @@ id: ObjectId;
 name: string;
 email: string;
 password: string;
-role: Role
+role: Role;
 }
 
-const userSchema = new Schema({
-    name: {type: String, require: true},
+const userSchema = new Schema(
+    {
+    name: {type: String, require: true
+
+    },
     email: {type: String, require: true},
     password: {type: String, require: true},
-    role: {type: String, enum: Object.values(Role), default: [Role.USER]}
+    role: {type: String, enum: Object.values(Role), default: [Role.USER]},
+   
 })
 
 export const Users = model<TUser>("users", userSchema)
@@ -30,7 +35,8 @@ export const Users = model<TUser>("users", userSchema)
 const registerSchema = Joi.object({
     name: Joi.string().alphanum().min(3).required(),
     email: Joi.string().pattern(emailRegexp).required(),
-    password: Joi.string().min(4).required()
+    password: Joi.string().min(4).required(),
+    
 })
 
 const loginSchema = Joi.object({
